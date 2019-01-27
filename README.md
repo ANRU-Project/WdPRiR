@@ -1,0 +1,2 @@
+# WdPRiR
+Ising Model
