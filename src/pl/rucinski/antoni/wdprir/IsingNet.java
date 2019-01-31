@@ -25,14 +25,15 @@ public class IsingNet {
 		Random generator = new Random();
 		
 		for(int i = 0; i < array.length; i++)
-		    for(int j = 0; j < array[i].length; j++)
+		    for(int j = 0; j < array.length; j++)
 		        array[i][j] =  2*(Math.abs(generator.nextInt())% 2)-1;
 	}
 	
 	public double avarageSpin() {
 		double avgSpin = 0;
+		System.out.println("AL: "+ array.length);
 		for(int i = 0; i < array.length; i++)
-		    for(int j = 0; j < array[i].length; j++)
+		    for(int j = 0; j < array.length; j++)
 		        avgSpin += array[i][j];
 		
 		return avgSpin/(array.length*array.length);
@@ -56,21 +57,47 @@ public class IsingNet {
 	 * @param j
 	 * @param lockers
 	 */
-	public void shiftSpin(int i, int j, double J, double h, double B,NetLockers lockers) {
+	public void shiftSpin(int i, int j, double J, double h, double B, NetLockers lockers) {
+		//System.out.println("h: " + h);
+		double P;
+		double H_old = calculateH(i, j, J, h);
+		//System.out.println("H_o: " + H_old);
 		if (lockers.setLock(i, j) == true) { // założenie zamka na dany spin + sasiadów 
 			array[i][j] = array[i][j]*(-1); // jeżeli udało się założyć wszystkie zamki => zamiana spinu
 		}
+		else {
+			//System.out.println("!!!");
+			return;
+		}
 		
-		double H = calculateH(i, j, J, h);
-		if (H > 0) { // jezeli H > 0 sprawdzamy czy zachowujemy dany stan
-			if (Math.random() < (1 - Math.pow(Math.E, (-B*H))) ) {	// powracamy do poprzedniego stanu z P = 1 - exp^(-B*H)
+		double H_new = calculateH(i, j, J, h);
+		//System.out.println("H_n: " + H_new);
+		
+		double delta_H = H_new - H_old;
+		//System.out.println("delta_h: " + delta_H);
+		
+		if (delta_H > 0) { // jezeli H > 0 sprawdzamy czy zachowujemy dany stan
+			
+			P =  1 - Math.pow(Math.E, ((-1)*B*delta_H));
+			
+			//System.out.println("P; " + P);
+			//System.out.println("(delta_H); " + (delta_H));
+			//System.out.println("(B); " + B);
+			//System.out.println("(-B*delta_H); " + ((-1)*B*delta_H));
+			
+			//System.out.println("(Math.pow(Math.E, (-B*delta_H)); " + Math.pow(Math.E, (-B*delta_H)));
+			
+			if (Math.random() < P ) {	// powracamy do poprzedniego stanu z P = 1 - exp^(-B*delta H)
 				System.out.println("powrót do poprzedniego stanu");
 				array[i][j] = array[i][j]*(-1);
 			}
 		}
-		System.out.print("lock w trakcie: " + lockers.getLock(1, 1)+ "\n");
+		else {
+			System.out.println("zostaje stan");
+		}
+		//System.out.print("lock w trakcie: " + lockers.getLock(i, j)+ "\n");
 		lockers.removeLock(i, j);
-		
+		//System.out.print("lock po: " + lockers.getLock(i, j)+ "\n");
 	}
 	
 	/**
@@ -80,9 +107,18 @@ public class IsingNet {
 	 */
 	public double calculateH(int i, int j, double J, double h) {
 		double H = 0;
+		//System.out.println("i: " + i);
+		//System.out.println("i: " + j);
 		
 		int [] ii = {i, i-1, i+1, i, i}; // tablica wspolrzednych i-towych
 		int [] jj = {j, j, j, j-1, j+1}; // tablica wspolrzednych j-towych
+		
+		/**
+		for(int k = 0; k< 5 ; k++) {
+			System.out.println(k + " "+ii[k] + " " + jj[k]);
+			//System.out.println(array[ii[k]][jj[k]]);
+		}
+		**/
 		
 		/* 0: dany punkt
 		 * 1: sasiad po lewej
@@ -108,12 +144,16 @@ public class IsingNet {
 		
 		
 		for(int k = 1; k< 5 ; k++) {
-			H += -J * array[0][0] * array[ii[k]][jj[k]];
+			//System.out.println(ii[k] + " " + jj[k]);
+			//System.out.println(array[ii[k]][jj[k]]);
+			H += (-1)*J * array[ii[0]][jj[0]] * array[ii[k]][jj[k]];
+			//System.out.println("H0:" +H);
 		}
-		
-		for(int k = 0; k< 5 ; k++) {
-			H += -h *  array[ii[k]][jj[k]];
-		}
+		//System.out.println("H1:" +H);
+		//for(int k = 0; k< 5 ; k++) {
+		H += (-1) * h *  array[ii[0]][jj[0]];
+		//System.out.println("H2:" +H);
+		//}
 		
 		return H;
 	}

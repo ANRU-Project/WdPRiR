@@ -24,7 +24,7 @@ public class NetLockers {
 	
 	public void resetLocker(){
 		for(int i = 0; i < array.length; i++)
-		    for(int j = 0; j < array[i].length; j++)
+		    for(int j = 0; j < array.length; j++)
 		        array[i][j] = new AtomicInteger(0);
 	}
 	
