@@ -1,3 +1,4 @@
 # WdPRiR
 Ising Model 
-Testing new branch
+Testing new branch tomek
+
