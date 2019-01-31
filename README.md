@@ -1,2 +1,3 @@
 # WdPRiR
-Ising Model
+Ising Model 
+Testing new branch
